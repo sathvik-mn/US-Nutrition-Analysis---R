@@ -1,0 +1,355 @@
+---
+title: "UN Nutrition Analysis"
+author: "Sathvik Maridasana Nagaraj"
+date: "2024-07-21"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+# Import the CSV file
+Nutrition_Physical_Activity_and_Obesity <- read.csv("D:/BioInformatics/US Nutrition Analysis/Nutrition__Physical_Activity__and_Obesity.csv")
+
+# View the first few rows of the dataset
+head(Nutrition_Physical_Activity_and_Obesity)
+```
+
+
+
+
+
+```{r}
+library(readr)
+library(gridExtra)
+library(ggplot2)
+library(huxtable)
+library(dplyr)
+library(broom)
+library(huxtable)
+library(flextable)
+```
+
+###Introduction
+In this simple analysis we will reorganize the data to create three time series of the united states concerning obesity, physical activity, and fruit and vegetable consumption scores. After analyzing the trends on a national basis we will then go on to compare California and Texas, the two most populous states.
+
+###1. Construct the time series
+First we simplify the dataset deleting
+
+1. The duplicate variables.
+
+2. The variables not usefull for our analyisis or with too many not available data.
+
+At the end we will remain with this data:
+
+
+```{r}
+data<-Nutrition_Physical_Activity_and_Obesity[,-c(2,4,5,6,8,9,10,12,13,14,18,24:33)]
+
+```
+
+
+```{r}
+colnames(data)<-c("year","location","topic","value", "low_conf_lim","high_conf_lim","sample_size","age","education","gender","income","race")
+```
+
+
+Now we can check if it s worth keeping the variables with NA. For doing so we build a simple function that counts the percentage of na data for a variable
+
+
+```{r}
+na_perc<-function(x){
+  a<-round(sum(is.na(x))/length(x)*100)
+  paste(a,"%")}
+
+
+a<-na_perc(data$age)
+b<-na_perc(data$education)
+c<-na_perc(data$gender)
+d<-na_perc(data$income)
+e<-na_perc(data$race)
+
+tabella <- data.frame( nrow= c("age","education","gender","income","race"),c(a,b,c,d,e))
+colnames(tabella)<-c("percentage of not available data")
+rownames(tabella) <- c("age","education","gender","income","race")
+tabella
+```
+
+These variables are for the most part composed of nonavailable data. However, we do not eliminate them right away because since we will be creating subdatasets there may be an adequate number of observations to use them in the future.
+
+In order to create the time series we arrange the data by year
+
+
+
+```{r}
+data<-arrange(data,data$year)
+
+```
+
+We filter for the “US” location
+
+```{r}
+data_us<- data[data$location== "US", ]
+
+```
+
+And finally we can filter by topic, creating tree national dataset about:
+
+1. Obesity
+2. Physical activity
+3. Fruit and vegetables consumption
+
+```{r}
+#national obesity dataset over time
+data_us_ob<-data_us[data_us$topic == "Obesity / Weight Status", ]
+
+#national Physical Activity - Behavior dataset over time
+data_us_pa<-data_us[data_us$topic == "Physical Activity - Behavior", ]
+
+#national Fruits and Vegetables - Behavior dataset over time
+data_us_fv<-data_us[data_us$topic == "Fruits and Vegetables - Behavior", ]
+```
+
+
+###2. National Obesity score over years
+```{r}
+ggplot(data = data_us_ob, aes(x = year, y= value))+
+  geom_point()+
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red")+
+  geom_smooth(method = "lm")+
+  ggtitle("National obesity score over years")
+```
+
+We can see that the obesity score has rised over the years, lets check this with a regression line
+
+```{r}
+model<-lm(data= data_us_ob , value ~ year)
+huxreg("National obesity score"= model,
+       statistics = FALSE,
+       error_format = "")
+```
+On average adding a year u have an increase of 0.250 on the obesity score that s statistically significant.
+
+It s important to note that we are not going to investigate statistical significance and R squared because these regressions will only serve to give us an idea of the slope of the trend that is more analytical than the visual idea of scatterplots. During the whole analysis we are going to consider a significance level of 90%.
+
+
+###3. National physical activity score over years
+
+
+```{r}
+ggplot(data = data_us_pa, aes(x = year, y= value))+
+  geom_point()+
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red")+
+  geom_smooth(method = "lm")+
+  ggtitle("National physical activity score over years")+
+  ylab("Physical activity")+
+  xlab("Year")
+```
+
+Before coming to conclusions about trends in physical activity over the years we note how ratings drop from one year to the next so we need to study what is happening in the data.
+
+```{r}
+a<-sum(data_us_pa$year == "2011")
+b<-sum(data_us_pa$year == "2012")
+c<-sum(data_us_pa$year == "2013")
+d<-sum(data_us_pa$year == "2014")
+e<-sum(data_us_pa$year == "2015")
+f<-sum(data_us_pa$year == "2016")
+g<-sum(data_us_pa$year == "2017")
+h<-sum(data_us_pa$year == "2018")
+i<-sum(data_us_pa$year == "2019")
+j<-sum(data_us_pa$year == "2020")
+k<-sum(data_us_pa$year == "2021")
+
+tabella <- matrix( c(a,b,c,d,e,f,g,h,i,j,k),nrow = 1)
+colnames(tabella)<-c(2011:2021)
+rownames(tabella) <- c("observations")
+tabella
+```
+Year-to-year observations alternate from 28 to 140 with the last two years being 28.
+
+We then split the data with 28 and 140 observations so that we can see if their trends change.
+
+
+```{r}
+#create the data subset for samples of 28 and 140 observations
+
+datasub140 <- data_us_pa[data_us_pa$year %in% c(2011, 2013,2015,2017,2019), ]
+datasub28 <- data_us_pa[data_us_pa$year %in% c(2012, 2014,2016,2018,2020,2021), ]
+
+
+plot140<- 
+  ggplot(data = datasub140, aes(x = year, y= value))+
+  geom_point()+
+  ylim(0,65)+
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red")+
+  geom_smooth(method = "lm")+
+  ggtitle("National physical activity score over years")+
+  ylab("Physical activity")+
+  xlab("Year")
+
+plot28<- 
+  ggplot(data = datasub28, aes(x = year, y= value))+
+  geom_point()+
+  ylim(0,65)+
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red")+
+  geom_smooth(method = "lm")+
+  ggtitle("National physical activity score over years")+
+  ylab("Physical activity")+
+  xlab("Year")
+
+grid.arrange(plot140,plot28,ncol=2)
+```
+
+When we have 140 observations your physical activity level is higher on average than when we have 28. The most important thing however is that physical activity has remained stationary in both cases as we can see from the regression (both slope coefficients are low and not significant).
+
+```{r}
+model28<-lm(data= datasub28 , value ~ year)
+model140<-lm(data= datasub140 , value ~ year)
+
+huxreg("model 28 obs" = model28,
+       "model 140 obs" = model140,
+       statistics ="r.squared" ,
+       error_format = "")
+```
+###4. National Fruits and Vegetables consumption over years
+
+For fruit and vegetable consumption we note an increasing trend but the available data only cover 2017, 2019 and 2021.
+
+```{r}
+ggplot(data = data_us_fv, aes(x = year, y= value))+
+  geom_point()+
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red")+
+  geom_smooth(method = "lm")+
+  ggtitle("National Fruits and Vegetables consumption over years")+
+  ylab("Fruits and Vegetables consumption")+
+  xlab("Year")
+```
+
+However, despite the lack of data, we can state that there has not been a conspicuous growth in fruit and vegetable consumption. The slope coefficient indeed is infact not statistically significant.
+
+```{r}
+model_fv<-lm(data= data_us_fv , value ~ year)
+
+huxreg("model fv" = model_fv,
+      statistics ="r.squared" ,
+       error_format = "")
+```
+
+###5. California and Texas comparison
+The previous method at the national level can be used to partition data and compare various states. In this example we are going to consider only the data from the 2 most important states by population (California and Texas) so we construct two datasets for the two states.
+
+```{r}
+#california data
+data_ca<- data[data$location== "CA", ]
+
+#texas data
+data_tx<- data[data$location== "TX", ]
+```
+
+Then we further partition the dataset for each state by dividing it by obesity, physical activity, and fruit and vegetable consumption. Now we have the time series of the three topics of the analysis and we can investigate them.
+
+
+```{r}
+#national obesity dataset over time
+data_ca_ob<-data_ca[data_ca$topic == "Obesity / Weight Status", ]
+#national Physical Activity - Behavior dataset over time
+data_ca_pa<-data_ca[data_ca$topic == "Physical Activity - Behavior", ]
+#national Fruits and Vegetables - Behavior dataset over time
+data_ca_fv<-data_ca[data_ca$topic == "Fruits and Vegetables - Behavior", ]
+
+#national obesity dataset over time
+data_tx_ob<-data_tx[data_tx$topic == "Obesity / Weight Status", ]
+#national Physical Activity - Behavior dataset over time
+data_tx_pa<-data_tx[data_tx$topic == "Physical Activity - Behavior", ]
+#national Fruits and Vegetables - Behavior dataset over time
+data_tx_fv<-data_tx[data_tx$topic == "Fruits and Vegetables - Behavior", ]
+```
+
+
+##5.1 Obesity score comparison
+```{r}
+california_obesity<-ggplot(data = data_ca_ob, aes(x = year, y= value))+
+  geom_point()+
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red")+
+  ylim(20,45)+
+  geom_smooth(method = "lm")+
+  ggtitle("California obesity score over years")+
+  ylab("Obesity Score")+
+  xlab("Year")
+
+texas_obesity<-ggplot(data = data_tx_ob, aes(x = year, y= value))+
+  geom_point()+
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red")+
+  ylim(20,45)+
+  geom_smooth(method = "lm")+
+  ggtitle("Texas obesity score over years")+
+  ylab("Obesity Score")+
+  xlab("Year")
+
+grid.arrange(california_obesity,texas_obesity,ncol=2)
+```
+
+Texas has higher levels of obesity, and in both states it has risen. Through the regression table we can identify the linear coefficient to see in which state it grew the fastest.
+
+```{r}
+reg_ca<-lm(data=data_ca_ob, value ~ year )
+reg_tx<-lm(data=data_tx_ob, value ~ year )
+
+
+huxreg("California obesity" = reg_ca,
+       "Texas obesity" = reg_tx,
+       statistics = "",
+       error_format = "")
+```
+
+
+Thanks to the regression we can see that California started from a lower level of obesity but it experienced a more pronounced growth.
