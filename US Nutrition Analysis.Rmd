@@ -353,3 +353,106 @@ huxreg("California obesity" = reg_ca,
 
 
 Thanks to the regression we can see that California started from a lower level of obesity but it experienced a more pronounced growth.
+
+##5.2 Physical activity score comparison
+
+
+```{r}
+california_pa<- ggplot(data = data_ca_pa, aes(x = year, y= value))+
+                  geom_point()+
+                  stat_summary(
+                    geom = "point",
+                    fun = "mean",
+                    col = "black",
+                    size = 3,
+                    shape = 24,
+                    fill = "red")+
+                  geom_smooth(method = "lm")+
+                  ggtitle("California physical activity score over years")+
+                  ylab("Physical activity")+
+                  xlab("Year")
+
+texas_pa<- ggplot(data = data_tx_pa, aes(x = year, y= value))+
+                  geom_point()+
+                  stat_summary(
+                    geom = "point",
+                    fun = "mean",
+                    col = "black",
+                    size = 3,
+                    shape = 24,
+                    fill = "red")+
+                  geom_smooth(method = "lm")+
+                  ggtitle("Texas physical activity score over years")+
+                  ylab("Physical activity")+
+                  xlab("Year")
+
+grid.arrange(california_pa,texas_pa)
+```
+
+```{r}
+california <- lm(data= data_ca_pa, value ~ year)
+texas <- lm(data= data_tx_pa , value ~ year)
+
+huxreg("California pa" = california,
+       "Texas pa" = texas,
+       statistics ="r.squared" ,
+       error_format = "")
+```
+
+We can say that in texas the physical activity score remained unchanged while in California it worsened as evidenced by the statistically significant negative slope coefficient.
+
+##5.3 Fruit and vegetable consumption score comparison
+```{r}
+california<-ggplot(data = data_ca_fv, aes(x = year, y= value))+
+            geom_point()+
+            stat_summary(
+              geom = "point",
+              fun = "mean",
+              col = "black",
+              size = 3,
+              shape = 24,
+              fill = "red")+
+            geom_smooth(method = "lm")+
+            ggtitle("California Fruits and Vegetables consumption over years")+
+            ylab("F&V consumption")+
+            xlab("Year")
+
+texas<-ggplot(data = data_tx_fv, aes(x = year, y= value))+
+        geom_point()+
+        stat_summary(
+          geom = "point",
+          fun = "mean",
+          col = "black",
+          size = 3,
+          shape = 24,
+          fill = "red")+
+        geom_smooth(method = "lm")+
+        ggtitle("Texas Fruits and Vegetables consumption over years")+
+        ylab("F&V consumption")+
+        xlab("Year")
+
+grid.arrange(california,texas)
+```
+
+```{r}
+model_fv_ca<-lm(data= data_ca_fv , value ~ year)
+model_fv_tx<-lm(data= data_tx_fv , value ~ year)
+
+huxreg("California fv" = model_fv_ca,
+       "Texas fv"= model_fv_tx,
+        statistics ="r.squared" ,
+        error_format = "")
+```
+
+Finally we note how there was no significant increase in fruit and vegetable consumption in either state.
+
+###Conclusion
+We can conclude saying that:
+
+1. On a national base:
+    The obesity score has increased over the years while
+    The physical activity and fruit-vegetables consumption remained stationary
+2. Comparing California and Texas:
+    The obesity score has increased over the years, especially in California
+    The physical activity score has decreased in California, remaining constant in Texas
+    The fruit-vegetable consumption has not increased in both countries
