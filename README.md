@@ -14,7 +14,7 @@ National Trends Analysis
 State Comparisons
 Conclusion
 
-##Data Preparation and Cleaning
+## Data Preparation and Cleaning
 The dataset is imported from a CSV file and cleaned to remove duplicate variables and those with excessive missing data. The remaining variables are renamed for clarity. A function is created to calculate the percentage of missing data for each variable, which guides further data cleaning decisions.
 
 ##National Trends Analysis
