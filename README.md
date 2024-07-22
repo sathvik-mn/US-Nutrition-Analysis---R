@@ -17,28 +17,28 @@ Conclusion
 ## Data Preparation and Cleaning
 The dataset is imported from a CSV file and cleaned to remove duplicate variables and those with excessive missing data. The remaining variables are renamed for clarity. A function is created to calculate the percentage of missing data for each variable, which guides further data cleaning decisions.
 
-##National Trends Analysis
+## National Trends Analysis
 This section constructs time series for the entire US concerning obesity, physical activity, and fruit and vegetable consumption. The data is filtered by location and topic to create specific datasets for each trend.
 
-##Obesity Trend
+## Obesity Trend
 The obesity trend over the years is visualized using scatter plots and regression analysis. The analysis shows that the obesity score has increased over the years, and this increase is statistically significant.
 
-##Physical Activity Trend
+## Physical Activity Trend
 The physical activity trend is analyzed similarly, with additional steps to address varying sample sizes across years. The analysis reveals that physical activity levels have remained stationary over the years.
 
-##Fruit and Vegetable Consumption Trend
+## Fruit and Vegetable Consumption Trend
 The trend for fruit and vegetable consumption is visualized and analyzed, noting the limited years of available data. The analysis indicates no significant growth in fruit and vegetable consumption.
 
-##State Comparisons
+## State Comparisons
 This section compares the trends between California and Texas. Data for each state is filtered and analyzed separately.
 
-##Obesity Score Comparison
+## Obesity Score Comparison
 The obesity scores for California and Texas are compared using scatter plots and regression analysis. The results show that Texas has higher levels of obesity, and while obesity has risen in both states, California has experienced a more pronounced growth.
 
-##Physical Activity and Fruit and Vegetable Consumption Comparisons
+## Physical Activity and Fruit and Vegetable Consumption Comparisons
 Similar analyses are conducted for physical activity and fruit and vegetable consumption scores. The results indicate that physical activity levels have remained constant in Texas but have decreased in California. Fruit and vegetable consumption has not shown significant increases in either state.
 
-##Conclusion
+## Conclusion
 The analysis concludes that:
 
 1. National Trends:
