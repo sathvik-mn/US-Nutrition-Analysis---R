@@ -4,6 +4,7 @@
 
 ## Project Overview
 
+
 This project is a comprehensive analysis of nutrition, physical activity, and obesity trends in the United States. The dataset used in this project is "Nutrition, Physical Activity, and Obesity," which includes information from various states in the US over multiple years. The analysis focuses on creating time series for national trends and comparing two populous states, California and Texas.
 
 ##Project Structure
