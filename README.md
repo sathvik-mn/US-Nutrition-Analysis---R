@@ -11,7 +11,7 @@ This project is a comprehensive analysis of nutrition, physical activity, and ob
 The project is organized into several sections, each addressing different aspects of the analysis. The main sections are:
 
 * Data Preparation and Cleaning
-* National Trends Analysis
+* National Trends Analysis 
 * State Comparisons
 * Conclusion
 
